@@ -1,5 +1,6 @@
 # JAVI_SSU_SERVER2
 
+1.
 Required Folders :
 
 https://drive.google.com/file/d/1ktYwTMfO3WgmHDU6HVVBg4iBBmcq74VP/view?usp=drive_link
@@ -11,5 +12,5 @@ unzip -> put in this route
 
 NeuroSync_Player/utils/voice_conversion/
 
-
+2.
 Wrtie OpenAI key in gpt_to_face.py
