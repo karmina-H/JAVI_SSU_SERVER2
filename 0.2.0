@@ -1,0 +1,9 @@
+Collecting ffmpeg-python
+  Downloading ffmpeg_python-0.2.0-py3-none-any.whl.metadata (1.7 kB)
+Collecting future (from ffmpeg-python)
+  Using cached future-1.0.0-py3-none-any.whl.metadata (4.0 kB)
+Downloading ffmpeg_python-0.2.0-py3-none-any.whl (25 kB)
+Using cached future-1.0.0-py3-none-any.whl (491 kB)
+Installing collected packages: future, ffmpeg-python
+
+Successfully installed ffmpeg-python-0.2.0 future-1.0.0
