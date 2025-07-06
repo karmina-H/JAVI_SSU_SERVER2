@@ -1,29 +1,29 @@
-# from transformers import pipeline
-# import os
+from transformers import pipeline
+import os
 
-# # 아래에 본인 토큰을 다시 한번 확인해서 넣어주세요.
-# my_token = ""
-# os.environ["HUGGING_FACE_HUB_TOKEN"] = my_token
+# 아래에 본인 토큰을 다시 한번 확인해서 넣어주세요.
+my_token = ""
+os.environ["HUGGING_FACE_HUB_TOKEN"] = my_token
 
-# print("="*50)
-# print("독립적인 환경에서 모델 로드 테스트를 시작합니다...")
-# print(f"사용될 토큰: {my_token[:5]}...") # 토큰 앞 5자리만 보여줌
-# print("="*50)
+print("="*50)
+print("독립적인 환경에서 모델 로드 테스트를 시작합니다...")
+print(f"사용될 토큰: {my_token[:5]}...") # 토큰 앞 5자리만 보여줌
+print("="*50)
 
-# try:
-#     # STT 파이프라인 로드를 시도합니다.
-#     stt_pipeline = pipeline(
-#         task="automatic-speech-recognition",
-#         model="openai/whisper-small",
-#         token=my_token
-#     )
-#     print("\n\n✅✅✅ 성공! 독립 테스트에서 모델을 정상적으로 로드했습니다.")
-#     print("    이는 사용자님의 PC 환경이나 토큰에는 문제가 없다는 뜻입니다.")
-#     print("    문제의 원인은 100% june-va 프로그램 내부에 있습니다.")
+try:
+    # STT 파이프라인 로드를 시도합니다.
+    stt_pipeline = pipeline(
+        task="automatic-speech-recognition",
+        model="openai/whisper-small",
+        token=my_token
+    )
+    print("\n\n✅✅✅ 성공! 독립 테스트에서 모델을 정상적으로 로드했습니다.")
+    print("    이는 사용자님의 PC 환경이나 토큰에는 문제가 없다는 뜻입니다.")
+    print("    문제의 원인은 100% june-va 프로그램 내부에 있습니다.")
 
-# except Exception as e:
-#     print(f"\n\n❌❌❌ 실패! 이 독립 테스트에서도 오류가 발생했습니다.")
-#     print(f"    오류 내용: {e}")
+except Exception as e:
+    print(f"\n\n❌❌❌ 실패! 이 독립 테스트에서도 오류가 발생했습니다.")
+    print(f"    오류 내용: {e}")
 
 ##############################
 
