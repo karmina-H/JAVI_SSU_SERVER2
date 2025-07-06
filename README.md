@@ -1,5 +1,9 @@
 # JAVI_SSU_SERVER2
 
+modelDown파일과 tts인가 stt에 허깅페이스 토큰만 넣어주면 됨!
+
+
+
 1.
 Required Folders :
 
