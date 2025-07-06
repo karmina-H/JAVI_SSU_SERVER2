@@ -18,4 +18,5 @@ sudo apt-get install portaudio19-dev
 이거하고 다시설치
 ollama ->
 curl -fsSL https://ollama.com/install.sh | sh
-ollama pull llama4-scout
+llama serve
+ollama pull llama4:scout
