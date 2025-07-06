@@ -13,4 +13,4 @@ unzip -> put in this route
 NeuroSync_Player/utils/voice_conversion/
 
 2.
-Wrtie OpenAI key in gpt_to_face.py
+Wrtie huggingface_tocken in stt.py
