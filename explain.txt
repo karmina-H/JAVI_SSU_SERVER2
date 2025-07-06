@@ -9,3 +9,7 @@ pip install fairseq
 
 pip uninstall torch torchvision torchaudio
 conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+
+pyaudio설치 안될시
+sudo apt-get install python3-dev build-essential 
+이거하고 다시설치
