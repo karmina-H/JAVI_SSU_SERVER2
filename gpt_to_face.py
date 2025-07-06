@@ -21,7 +21,10 @@ from types import GeneratorType
 import httpx
 import numpy as np
 import soundfile as sf
+<<<<<<< HEAD
+=======
 import openai           # OpenAI Python SDK (>=1.30)
+>>>>>>> a6732d87576fed2a8e00dedfdf8f7b7a187b1bea
 import pygame
 import sounddevice as sd
 from scipy.io.wavfile import write as wav_write
@@ -29,6 +32,10 @@ import json
 
 import threading
 import socket
+<<<<<<< HEAD
+import wave
+=======
+>>>>>>> a6732d87576fed2a8e00dedfdf8f7b7a187b1bea
 
 from g2pk import G2p    # 로마자 변환
 from utils.voice_conversion.voice_conversion import run_voice_conversion
@@ -46,14 +53,50 @@ os.environ["OPENAI_API_KEY"] = ""
 
 from flask import Flask
 
+<<<<<<< HEAD
+############# stt,tts,llama init  ####################
+from models.LLM import LLM
+from models.TTS import TTS
+from models.STT import STT
+
+# LLM (Large Language Model) 설정
+llm_config = {'disable_chat_history': False,'model': 'llama3.1-8b-instruct-q4_0'}
+# STT (Speech-to-Text) 설정
+stt_config = {'device': 'cuda','generation_args': {'batch_size': 8},'model': 'openai/whisper-small'}
+# TTS (Text-to-Speech) 설정
+tts_config = {'device': 'cuda', 'model': 'tts_models/multilingual/multi-dataset/xtts_v2'}
+
+
+
+stt_model = STT(**stt_config) if stt_config else None
+tts_model = TTS(**tts_config) if tts_config else None
+llm_model = LLM(**llm_config)
+
+# if not stt_model.exists():
+#     print(f"Invalid stt_model model")
+#     exit()
+# if not tts_model.exists():
+#     print(f"Invalid tts_model model")
+#     exit()
+if not llm_model.exists():
+    print(f"Invalid ollama model")
+    exit()
+
+##################
+
+# ────────────────── 설정값 ─────────────────────────────────────
+=======
 # ────────────────── 설정값 ─────────────────────────────────────
 TTS_MODEL = "tts-1"
 TRANSCRIBE_MODEL = "whisper-1"
 GPT_MODEL = "gpt-4o-mini"
+>>>>>>> a6732d87576fed2a8e00dedfdf8f7b7a187b1bea
 AUDIO_SAMPLE_RATE = 16_000
 OUTPUT_WAV_DIR = Path.cwd() / "wav_cache"
 OUTPUT_WAV_DIR.mkdir(parents=True, exist_ok=True)
 
+<<<<<<< HEAD
+=======
 # ────────────────── OpenAI 클라이언트 ─────────────────────────
 try:
     client = openai.OpenAI(
@@ -66,6 +109,7 @@ except openai.OpenAIError as e:
 
 warnings.filterwarnings("ignore", message="Couldn't find ffmpeg or avconv")
 
+>>>>>>> a6732d87576fed2a8e00dedfdf8f7b7a187b1bea
 # ────────────────── Voice preset discovery ────────────────────
 # 이 스크립트가 있는 폴더를 기준으로 상대 경로 설정
 BASE_DIR = Path(__file__).resolve().parent
@@ -183,6 +227,50 @@ def record_microphone() -> Path:
     fd, path = tempfile.mkstemp(suffix=".wav")
     os.close(fd)
     
+<<<<<<< HEAD
+    print(f"녹음된거 path: {path}")
+    wav_write(path, AUDIO_SAMPLE_RATE, audio_np)
+    return Path(path)
+
+
+def transcribe_audio(wav_path: Path) -> str:
+    """오디오 파일 경로를 받아 텍스트로 변환"""
+    audio_data = None
+    with wave.open(str(wav_path), 'rb') as wf:
+        # 오디오 파일 정보 가져오기
+        n_channels = wf.getnchannels()
+        sampwidth = wf.getsampwidth()
+        framerate = wf.getframerate()
+        n_frames = wf.getnframes()
+        
+        # 프레임 읽기
+        frames = wf.readframes(n_frames)
+        audio_data = np.frombuffer(frames, dtype=np.int16)
+        
+    if audio_data is not None:
+        # stt_model.forward의 입력은 일반적으로 NumPy 배열 또는 텐서 형태입니다.
+        # `openai/whisper-small` 모델의 경우, 일반적으로 16kHz 모노 오디오를 기대합니다.
+        # `audio_data` 변수가 이 모델의 입력 형식에 맞아야 합니다.
+        transcription = stt_model.forward(audio_data)
+        print("변환성공")
+        return transcription
+    else:
+        print("변환실패")
+        return None
+    
+
+def llama_response(prompt: str, history: list[dict]) -> str:
+    """GPT 모델에 프롬프트를 보내고 응답을 받음"""
+    answer = llm_model.forward(prompt)
+    return answer
+
+def text_to_speech(text: str,speed: float = 1.0) -> Path:
+    print("tts함수시작")
+    output_file_path = "output.wav"
+    synthesis = tts_model.forward(text, output_file_path)
+    tts_model.model.synthesizer.save_wav(wav=synthesis, path=output_file_path)
+    return Path(output_file_path)
+=======
     wav_write(path, AUDIO_SAMPLE_RATE, audio_np)
     return Path(path)
 
@@ -215,6 +303,7 @@ def text_to_speech(text: str,speed: float = 1.0) -> Path:
     os.close(fd)
     resp.stream_to_file(path)
     return Path(path)
+>>>>>>> a6732d87576fed2a8e00dedfdf8f7b7a187b1bea
 
 def play_audio(file_path: Path):
     """주어진 경로의 오디오 파일을 재생"""
@@ -262,6 +351,10 @@ def _rvc_pipeline(tts_path: Path, voice_name: str) -> Path:
 
 def build_voice_reply_audio(wav_path: Path, history: list[dict], voice_name: str) -> Path:
     """음성 입력 → STT → GPT → TTS (RVC는 비활성화)"""
+<<<<<<< HEAD
+    #voice to text
+=======
+>>>>>>> a6732d87576fed2a8e00dedfdf8f7b7a187b1bea
     print("1. Transcribing user audio...")
     user_text = transcribe_audio(wav_path)
     print(f"   > User said: {user_text}")
@@ -271,8 +364,14 @@ def build_voice_reply_audio(wav_path: Path, history: list[dict], voice_name: str
     emotion_result, emotion_probability  = predict_emotion(wav_path)
     print(f"   > emotion_results: {emotion_result, emotion_probability}")
 
+<<<<<<< HEAD
+    #gpt
+    print("2. Getting response from GPT...")
+    assistant_ko = llama_response(user_text, history)
+=======
     print("2. Getting response from GPT...")
     assistant_ko = gpt_response(user_text, history)
+>>>>>>> a6732d87576fed2a8e00dedfdf8f7b7a187b1bea
     print(f"   > GPT responds: {assistant_ko}")
     
     print("2.5 Send Emotion and Response To Unity...")
@@ -284,6 +383,11 @@ def build_voice_reply_audio(wav_path: Path, history: list[dict], voice_name: str
     assistant_en = romanize_korean(assistant_ko)
     tts_path = text_to_speech(assistant_en, speed=0.9)
     
+<<<<<<< HEAD
+    
+
+=======
+>>>>>>> a6732d87576fed2a8e00dedfdf8f7b7a187b1bea
     if voice_name == "Basic":
         return tts_path
     else:

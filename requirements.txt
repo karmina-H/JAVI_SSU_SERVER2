@@ -1,10 +1,32 @@
 pygame==2.6.1
+<<<<<<< HEAD
+click>=8.1.7
+colorama>=0.4.6
+=======
+>>>>>>> a6732d87576fed2a8e00dedfdf8f7b7a187b1bea
 keyboard==0.13.5
 timecode==1.4.1
 pandas==2.2.3
 requests==2.32.3
 PyAudio==0.2.14
 soundfile==0.13.1
+<<<<<<< HEAD
+pydantic-settings>=2.3.1
+pydub==0.25.1
+scipy==1.15.2
+torch>=2.3.1
+torchaudio>=2.3.1
+ollama>=0.2.1
+transformers>=4.40.2
+numpy>=1.26.4
+coqui-tts>=0.24.1
+sounddevice
+g2pk
+faiss-cpu
+flask
+hangul_romanize
+=======
 pydub==0.25.1
 scipy==1.15.2
 openai==1.75.0
+>>>>>>> a6732d87576fed2a8e00dedfdf8f7b7a187b1bea
