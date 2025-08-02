@@ -8,7 +8,7 @@ livelink_voice_chat.py — Unity 연동 Voice‑to‑Voice GPT Demo
 """
 
 # ────────────────── 외부 라이브러리 및 표준 ───────────────────
-import os, sys, tempfile, warnings
+import os, sys, tempfile, warnings, wave
 from pathlib import Path
 from threading import Thread, Event
 import httpx
@@ -27,9 +27,29 @@ from livelink.animations.default_animation import default_animation_loop
 from utils.emotion_recognition.predict_emotion import predict_emotion
 import socket
 import time
+import torch
+from models.LLM import LLM
+from models.TTS import TTS
+from models.STT import STT
+
+
+# LLM (Large Language Model) 설정
+llm_config = {'disable_chat_history': False,'model': 'llama3.1-8b-instruct-q4_0'}
+# STT (Speech-to-Text) 설정
+stt_config = {'device': 'cuda','generation_args': {'batch_size': 8},'model': 'openai/whisper-small'}
+# TTS (Text-to-Speech) 설정
+tts_config = {'device': 'cuda', 'model': 'tts_models/multilingual/multi-dataset/xtts_v2'}
 
 
 
+stt_model = STT(**stt_config) if stt_config else None
+tts_model = TTS(**tts_config) if tts_config else None
+llm_model = LLM(**llm_config)
+
+if not llm_model.exists():
+    print(f"Invalid ollama model")
+    exit()
+    
 # ────────────────── 설정값 ─────────────────────────────────────
 TTS_MODEL = "tts-1-hd"
 TRANSCRIBE_MODEL = "whisper-1"
@@ -88,6 +108,15 @@ def set_voice(voice_name):
 # def info_sent_to_unity(...): ...
 
 
+
+# llama 모델 적용
+def llama_response(prompt: str, history: list[dict]) -> str:
+    """GPT 모델에 프롬프트를 보내고 응답을 받음"""
+    answer = llm_model.forward(prompt)
+    return answer
+
+
+
 # ────────────────── 오디오 유틸리티 및 V2V 파이프라인 ───────────────────
 def transcribe_audio(wav_path: Path) -> str:
     with wav_path.open("rb") as f:
@@ -110,6 +139,41 @@ def text_to_speech(text: str, speed: float = 1.0) -> Path:
         path = f.name
     resp.stream_to_file(path)
     return Path(path)
+
+def text_to_speech_llama(text: str) -> Path:
+    if not tts_model:
+        raise RuntimeError("TTS 모델이 초기화되지 않았습니다.")
+
+    print(f'🗣️ 로컬 TTS 모델 호출: "{text}"')
+
+    # 1) 합성
+    audio = tts_model.forward(text=text, output_filepath="")  # forward가 파일을 쓰지 않는다면 그대로
+
+    # 2) numpy 1D float32 [-1,1]로 정리
+    if isinstance(audio, torch.Tensor):
+        audio = audio.detach().cpu().numpy()
+    audio = np.asarray(audio, dtype=np.float32)
+    if audio.ndim > 1:
+        audio = audio.squeeze()
+    # 안전 클리핑
+    audio = np.clip(audio, -1.0, 1.0)
+
+    # 3) 샘플레이트: 모델에서 얻기
+    # Coqui TTS(api) 인스턴스에 보통 아래 중 하나가 있습니다.
+    sr = getattr(tts_model.model, "output_sample_rate", None) \
+         or getattr(getattr(tts_model.model, "synthesizer", None), "output_sample_rate", None) \
+         or 24000  # 최후의 수단
+
+    # 4) 파일로 저장 (PCM16)
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+        out_path = Path(f.name)
+
+    sf.write(out_path.as_posix(), audio, sr, subtype="PCM_16")
+
+    print(f"🎵 오디오가 '{out_path}' 파일로 저장되었습니다. (sr={sr}, len={len(audio)/sr:.2f}s)")
+    return out_path
+
+
 
 def numpy_to_wav_in_cache(audio_np: np.ndarray, sr: int) -> Path:
     timestamp = int(time.time() * 1000)
@@ -135,8 +199,12 @@ def build_voice_reply_audio(wav_path: Path, history: list[dict], voice_name: str
     emotion_result, emotion_probability = predict_emotion(wav_path)
     print(f"   > emotion_results: {emotion_result, emotion_probability}")
 
-    print("2. Getting response from GPT...")
-    assistant_ko = gpt_response(user_text, history)
+    #print("2. Getting response from GPT...")
+    #assistant_ko = gpt_response(user_text, history)
+    
+    print("2. Getting response from Llama...")
+    assistant_ko = llama_response(user_text, history)
+    
     
     assistant_en = romanize_korean(assistant_ko)
     
@@ -153,7 +221,9 @@ def build_voice_reply_audio(wav_path: Path, history: list[dict], voice_name: str
     }
     
     print(f"3. Converting text to speech with '{voice_name}' voice...")
-    tts_path = text_to_speech(assistant_en, speed=0.9)
+    #tts_path = text_to_speech(assistant_en, speed=0.9)
+    tts_path = text_to_speech_llama(assistant_ko)
+    
     
     final_audio_path = tts_path
     #if voice_name != "Basic":
