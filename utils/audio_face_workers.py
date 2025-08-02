@@ -48,7 +48,7 @@ def log_timing_worker(log_queue):
             print(f"Logging error: {e}")
 
 
-def process_wav_file(wav_file, py_face, socket_connection, default_animation_thread):
+def process_wav_file(wav_file, py_face, socket_connection, default_animation_thread, remote_ip, stop_flag):
 
     if not os.path.exists(wav_file):
         print(f"File {wav_file} does not exist.")  
@@ -61,13 +61,15 @@ def process_wav_file(wav_file, py_face, socket_connection, default_animation_thr
         print(f"Failed to read {wav_file}") 
         return
     
-    blendshapes = send_audio_to_neurosync(audio_bytes)
+    #blednshape 받아옴 
+    blendshapes = send_audio_to_neurosync(audio_bytes, remote_ip)
 
     if blendshapes is None:
         print("Failed to get blendshapes from the API.") 
         return
-
-    run_audio_animation(wav_file, blendshapes, py_face, socket_connection, default_animation_thread)
+    
+    print("blendshapes, ")
+    run_audio_animation(wav_file, blendshapes, py_face, socket_connection, default_animation_thread,stop_flag)
     save_generated_data_from_wav(wav_file, blendshapes)
 
     print("Processing completed successfully.")  

@@ -19,6 +19,14 @@ ID2LABEL = {
     6: "Sadness"
 }
 
+label2id = {
+    "Happiness": 0,
+    "Sadness": 1,
+    "Anger": 2,
+    "Neutral": 3
+}
+id2label = {v: k for k, v in label2id.items()}
+
 # 장치 설정
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {DEVICE}")
@@ -27,9 +35,9 @@ print(f"Using device: {DEVICE}")
 try:
     print("모델과 프로세서를 로딩합니다...")
     SCRIPT_DIR = Path(__file__).resolve().parent
-    MODEL_PATH = SCRIPT_DIR / "emotion_model.pt"
+    MODEL_PATH = SCRIPT_DIR / "emotion_model_recent.pt"
     
-    MODEL = Wav2Vec2ForEmotion(num_labels=len(ID2LABEL))
+    MODEL = Wav2Vec2ForEmotion(num_labels=len(id2label))
     MODEL.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
     MODEL.to(DEVICE)
     MODEL.eval()
@@ -73,7 +81,6 @@ def predict_emotion(voice_path: str) -> tuple[str, float] | None:
         attention_mask = inputs.get("attention_mask")
         if attention_mask is not None:
             attention_mask = attention_mask.to(DEVICE)
-        
         # 🔹 추론
         with torch.no_grad():
             outputs = MODEL(input_values=input_values, attention_mask=attention_mask)
@@ -89,8 +96,9 @@ def predict_emotion(voice_path: str) -> tuple[str, float] | None:
             predicted_id = predicted_id_tensor.item()
             highest_probability = confidence_score.item()
             
-        # [수정] 결과 반환 (감정 레이블과 확률 값을 함께 반환)
-        predicted_label = ID2LABEL[predicted_id]
+       
+        # ...
+        predicted_label = id2label[predicted_id] 
         return predicted_label, highest_probability
 
     except Exception as e:
